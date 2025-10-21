@@ -59,10 +59,10 @@ const ScrollingBanner = ({ data }) => {
                                 style={{ cursor: item.url ? 'pointer' : 'default' }}
                             >
                                 <img 
-                                    src={item.urlToImage || 'https://via.placeholder.com/800x400/2a2a2a/ffffff?text=No+Image'} 
+                                    src={item.urlToImage || 'https://via.placeholder.com/800x400/667eea/ffffff?text=No+Image'} 
                                     alt={item.title}
                                     onError={(e) => {
-                                        e.target.src = 'https://via.placeholder.com/800x400/2a2a2a/ffffff?text=No+Image'
+                                        e.target.src = 'https://via.placeholder.com/800x400/667eea/ffffff?text=No+Image'
                                     }}
                                 />
                                 <div className="slide-overlay">
@@ -79,28 +79,6 @@ const ScrollingBanner = ({ data }) => {
                     ))}
                 </div>
                 
-                {/* Navigation dots */}
-                <div className="banner-dots">
-                    {data.map((_, index) => (
-                        <button
-                            key={index}
-                            className={`dot ${index === currentIndex ? 'active' : ''}`}
-                            onClick={() => handleDotClick(index)}
-                            aria-label={`Go to slide ${index + 1}`}
-                        />
-                    ))}
-                </div>
-                
-                {/* Progress indicator */}
-                <div className="banner-progress">
-                    <div 
-                        className="progress-bar"
-                        style={{
-                            width: `${((currentIndex + 1) / data.length) * 100}%`,
-                            transition: 'width 0.1s linear'
-                        }}
-                    />
-                </div>
             </div>
         </div>
     )
