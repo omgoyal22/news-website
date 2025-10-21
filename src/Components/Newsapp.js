@@ -9,7 +9,7 @@ const Newsapp = () => {
     const [currentDate, setCurrentDate] = useState(new Date())
     const [isLoading, setIsLoading] = useState(false)
     const [activeCategory, setActiveCategory] = useState("startups")
-    const API_KEY = "9c3ed8ee95884dec979460a60f96675b";
+    const API_KEY = "bcc1d8445e254e9cb1bce4a9c68f62ef";
 
     // Real-time date and time fetching
     useEffect(() => {
