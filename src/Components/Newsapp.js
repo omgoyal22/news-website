@@ -10,6 +10,75 @@ const Newsapp = () => {
     const [isLoading, setIsLoading] = useState(false)
     const [activeCategory, setActiveCategory] = useState("startups")
     const API_KEY = "9c3ed8ee95884dec979460a60f96675";
+    const BACKUP_API_KEY = "97cd2e7af82f472c98add0cc9c84a746";
+
+
+    // Fallback data functions
+    const getFallbackNewsData = () => {
+        return [
+            {
+                title: "Revolutionary AI Startup Raises $50M in Series A Funding",
+                description: "A groundbreaking artificial intelligence startup has successfully secured $50 million in Series A funding to expand its operations globally and develop next-generation AI solutions.",
+                urlToImage: "https://images.unsplash.com/photo-1551434678-e076c223a692?w=400&h=250&fit=crop",
+                url: "https://example.com/ai-startup-funding",
+                source: { name: "TechCrunch" },
+                publishedAt: new Date().toISOString()
+            },
+            {
+                title: "Fintech Innovation: New Payment Platform Disrupts Traditional Banking",
+                description: "A revolutionary fintech startup has launched a new payment platform that could transform the traditional banking sector with its innovative approach to digital transactions.",
+                urlToImage: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400&h=250&fit=crop",
+                url: "https://example.com/fintech-innovation",
+                source: { name: "Forbes" },
+                publishedAt: new Date().toISOString()
+            },
+            {
+                title: "Healthcare Technology Startup Secures Major Investment",
+                description: "A promising healthcare technology startup has received significant investment to develop cutting-edge medical solutions that could revolutionize patient care.",
+                urlToImage: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=400&h=250&fit=crop",
+                url: "https://example.com/healthcare-tech",
+                source: { name: "Healthcare Weekly" },
+                publishedAt: new Date().toISOString()
+            },
+            {
+                title: "Green Energy Startup Leads Sustainable Innovation",
+                description: "An innovative green energy startup is leading the way in sustainable technology development, attracting major investors and environmental advocates.",
+                urlToImage: "https://images.unsplash.com/photo-1466611653911-95081537e5b7?w=400&h=250&fit=crop",
+                url: "https://example.com/green-energy",
+                source: { name: "Green Tech News" },
+                publishedAt: new Date().toISOString()
+            },
+            {
+                title: "EdTech Startup Transforms Online Learning Experience",
+                description: "A cutting-edge educational technology startup has developed a revolutionary platform that's transforming how students learn online with interactive and engaging content.",
+                urlToImage: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=400&h=250&fit=crop",
+                url: "https://example.com/edtech-startup",
+                source: { name: "Education Today" },
+                publishedAt: new Date().toISOString()
+            }
+        ];
+    };
+
+    const getFallbackFeaturedData = () => {
+        return [
+            {
+                title: "Global Startup Ecosystem Reaches New Heights in 2024",
+                description: "The global startup ecosystem has achieved unprecedented growth this year, with record-breaking investments and innovative solutions emerging across various industries.",
+                urlToImage: "https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=400&h=250&fit=crop",
+                url: "https://example.com/startup-ecosystem",
+                source: { name: "Startup Weekly" },
+                publishedAt: new Date().toISOString()
+            },
+            {
+                title: "Venture Capital Investment Trends Show Strong Growth",
+                description: "Recent data reveals that venture capital investments in startups have reached new heights, indicating a robust and thriving entrepreneurial landscape.",
+                urlToImage: "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=400&h=250&fit=crop",
+                url: "https://example.com/vc-trends",
+                source: { name: "VC Insights" },
+                publishedAt: new Date().toISOString()
+            }
+        ];
+    };
 
     // Real-time date and time fetching
     useEffect(() => {
@@ -28,7 +97,20 @@ const Newsapp = () => {
         try {
             // Enhanced search terms for startup-focused content
             const enhancedSearchTerm = `${searchTerm} startup unicorn funding venture capital tech innovation`
-            const response = await fetch(`https://newsapi.org/v2/everything?q=${enhancedSearchTerm}&sortBy=publishedAt&language=en&apiKey=${API_KEY}`);
+            
+            // Try primary API key first
+            let response = await fetch(`https://newsapi.org/v2/everything?q=${enhancedSearchTerm}&sortBy=publishedAt&language=en&apiKey=${API_KEY}`);
+            
+            if (!response.ok) {
+                console.warn(`Primary API failed with status ${response.status}, trying backup API...`);
+                // Try backup API key
+                response = await fetch(`https://newsapi.org/v2/everything?q=${enhancedSearchTerm}&sortBy=publishedAt&language=en&apiKey=${BACKUP_API_KEY}`);
+                
+                if (!response.ok) {
+                    throw new Error(`Both APIs failed! Primary: ${API_KEY}, Backup: ${BACKUP_API_KEY}`);
+                }
+            }
+            
             const jsonData = await response.json();
             console.log('NewsAPI Response:', jsonData);
             
@@ -37,12 +119,13 @@ const Newsapp = () => {
                 console.log('Setting news data:', dt.length, 'articles')
                 setNewsData(dt)
             } else {
-                console.warn('No articles found in NewsAPI response');
-                setNewsData([])
+                console.warn('No articles found in NewsAPI response, using fallback data');
+                setNewsData(getFallbackNewsData())
             }
         } catch (error) {
             console.error('Error fetching news:', error)
-            setNewsData([])
+            console.log('Using fallback data due to API error');
+            setNewsData(getFallbackNewsData())
         } finally {
             setIsLoading(false)
         }
@@ -51,7 +134,18 @@ const Newsapp = () => {
     const getFeaturedData = async() => {
         try {
             // Fetch startup-focused featured news
-            const response = await fetch(`https://newsapi.org/v2/everything?q=startup technology entrepreneurs funding&sortBy=publishedAt&language=en&apiKey=${API_KEY}`);
+            let response = await fetch(`https://newsapi.org/v2/everything?q=startup technology entrepreneurs funding&sortBy=publishedAt&language=en&apiKey=${API_KEY}`);
+            
+            if (!response.ok) {
+                console.warn(`Primary API failed for featured news with status ${response.status}, trying backup API...`);
+                // Try backup API key
+                response = await fetch(`https://newsapi.org/v2/everything?q=startup technology entrepreneurs funding&sortBy=publishedAt&language=en&apiKey=${BACKUP_API_KEY}`);
+                
+                if (!response.ok) {
+                    throw new Error(`Both APIs failed for featured news! Primary: ${API_KEY}, Backup: ${BACKUP_API_KEY}`);
+                }
+            }
+            
             const jsonData = await response.json();
             console.log('Featured News Response:', jsonData);
             
@@ -60,12 +154,13 @@ const Newsapp = () => {
                 console.log('Setting featured data:', featured.length, 'articles')
                 setFeaturedNews(featured)
             } else {
-                console.warn('No featured articles found in NewsAPI response');
-                setFeaturedNews([])
+                console.warn('No featured articles found, using fallback data');
+                setFeaturedNews(getFallbackFeaturedData())
             }
         } catch (error) {
             console.error('Error fetching featured news:', error)
-            setFeaturedNews([])
+            console.log('Using fallback featured data due to API error');
+            setFeaturedNews(getFallbackFeaturedData())
         }
     }
 
